@@ -14,13 +14,11 @@ namespace EventApp.Controllers
     [ApiController]
     public class EventsController : ControllerBase
     {
-        private List<Event> _events;
         private readonly IEventService _eventService;
 
         public EventsController(IEventService eventService)
-        {            
+        {
             _eventService = eventService;
-            _events = _eventService.CreateExampleEvents();
         }
 
         /// <summary>
@@ -32,7 +30,7 @@ namespace EventApp.Controllers
         [HttpGet]
         public ActionResult<IEnumerable<Event>> GetAll()
         {
-            return Ok(_events);
+            return Ok(_eventService.GetAll());
         }
 
         /// <summary>
@@ -45,12 +43,7 @@ namespace EventApp.Controllers
         [HttpGet("{evtId}")]
         public ActionResult<Event> Get(int evtId)
         {
-            var evt = _events.FirstOrDefault(e => e.Id == evtId);
-            if(evt != null)
-            {
-                return Ok(evt);
-            }
-            return StatusCode(500);
+            return Ok(_eventService.Get(evtId));
         }
 
         /// <summary>
@@ -63,8 +56,8 @@ namespace EventApp.Controllers
         [HttpPost]
         public IActionResult Create([FromBody] Event newEvent)
         {
-            _events.Add(newEvent);
-            return Created($"{newEvent.Id}", newEvent);
+            var evt = _eventService.Create(newEvent);
+            return Created($"{evt.Id}", evt);
         }
 
         /// <summary>
@@ -78,14 +71,7 @@ namespace EventApp.Controllers
         [HttpPut("{evtId}")]
         public IActionResult Update(int evtId, [FromBody] Event updatedEvent)
         {
-            var evt = _events.FirstOrDefault(e => e.Id == evtId);
-            if(evt != null)
-            {
-                evt = updatedEvent;
-                evt.Id = evtId;
-                return Ok(_events);
-            }
-            return StatusCode(500);
+            return Ok(_eventService.Update(evtId, updatedEvent));
         }
 
         /// <summary>
@@ -98,8 +84,7 @@ namespace EventApp.Controllers
         [HttpDelete("{evtId}")]
         public IActionResult Delete(int evtId)
         {
-            _events.RemoveAll(e => e.Id == evtId);
-            return Ok(_events);
+            return Ok(_eventService.Delete(evtId));
         }
     }
 }

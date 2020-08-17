@@ -11,15 +11,23 @@ namespace EventApp.Services
     {
         void Log(string message);
         List<Event> CreateExampleEvents();
+
+        IEnumerable<Event> GetAll();
+        Event Get(int id);
+        Event Create(Event newEvent);
+        Event Update(int evtId, Event updatedEvent);
+        IEnumerable<Event> Delete(int eventId);
     }
 
     public class EventService : IEventService
     {
         private readonly ILogger<EventService> _logger;
+        private List<Event> _events;
 
         public EventService(ILogger<EventService> logger)
         {
             _logger = logger;
+            _events = CreateExampleEvents();
         }
 
         public void Log(string message)
@@ -78,6 +86,45 @@ namespace EventApp.Services
             });
 
             return events;
+        }
+
+        public IEnumerable<Event> GetAll()
+        {
+            Log("GetAll");
+            return _events;
+        }
+
+        public Event Get(int id)
+        {
+            Log("Get(" + id + ")");
+            return _events.FirstOrDefault(e => e.Id == id);
+        }
+
+        public Event Create(Event newEvent)
+        {
+            Log("Create");
+            newEvent.Id = _events.Select(e => e.Id).Max() + 1;
+            _events.Add(newEvent);
+            return newEvent;
+        }
+
+        public Event Update(int evtId, Event updatedEvent)
+        {
+            Log("Update(" + evtId + ")");
+            var evt = _events.FirstOrDefault(e => e.Id == evtId);
+            if (evt != null)
+            {
+                evt = updatedEvent;
+                evt.Id = evtId;
+            }
+            return evt;
+        }
+
+        public IEnumerable<Event> Delete(int eventId)
+        {
+            Log("Delete(" + eventId + ")");
+            _events.RemoveAll(e => e.Id == eventId);
+            return _events;
         }
     }
 }
