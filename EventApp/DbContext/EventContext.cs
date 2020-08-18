@@ -11,6 +11,7 @@ namespace EventApp.Context
     {
         public DbSet<Event> Events { get; set; }
         public DbSet<Place> Places { get; set; }
+        public DbSet<ApiLogEntry> ApiLogEntries { get; set; }
 
         public EventContext(DbContextOptions<EventContext> options) : base(options)
         {

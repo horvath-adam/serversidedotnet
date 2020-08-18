@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using EventApp.Context;
+using EventApp.Middleware;
 using EventApp.Services;
 using EventApp.UnitOfWork;
 using Microsoft.AspNetCore.Builder;
@@ -62,11 +63,15 @@ namespace EventApp
 
             services.AddScoped<IEventService, EventService>();
             services.AddScoped<IPlaceService, PlaceService>();
+
+            services.AddScoped<IApiLogService, ApiLogService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            app.UseMiddleware<RequestLoggingMiddleware>();
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
