@@ -5,10 +5,8 @@ using System.Threading.Tasks;
 
 namespace EventApp.Models
 {
-    public class Event
+    public class Event : AbstractEntity
     {
-        public int Id { get; set; }
-
         public string Name { set; get; }
 
         public string Description { set; get; }
@@ -17,6 +15,11 @@ namespace EventApp.Models
 
         public DateTime End { get; set; }
 
-        public string Place { get; set; }
+        public Place Place { get; set; }
+        public int PlaceIdentity { get; set; }
+
+        public List<EventStaff> Staff { get; set; }
+
+        public bool AdultsOnly { get; set; }
     }
 }
