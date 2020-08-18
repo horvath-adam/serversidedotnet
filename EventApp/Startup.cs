@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using EventApp.Context;
 using EventApp.Services;
+using EventApp.UnitOfWork;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -56,6 +57,8 @@ namespace EventApp
             };
 
             services.AddDbContext<EventContext>(options => options.UseSqlServer(Configuration.GetConnectionString("EventDatabase")));
+
+            services.AddScoped<IUnitOfWork, UnitOfWork<EventContext>>();
 
             services.AddScoped<IEventService, EventService>();
             services.AddScoped<IPlaceService, PlaceService>();

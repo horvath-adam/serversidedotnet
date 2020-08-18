@@ -1,11 +1,10 @@
 ﻿using EventApp.Context;
 using EventApp.Models;
+using EventApp.UnitOfWork;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace EventApp.Services
 {
@@ -18,15 +17,13 @@ namespace EventApp.Services
         IEnumerable<Event> Delete(int eventId);
     }
 
-    public class EventService : IEventService
+    public class EventService : AbstractService, IEventService
     {
         private readonly ILogger<EventService> _logger;
-        private readonly EventContext _eventContext;
 
-        public EventService(ILogger<EventService> logger, EventContext eventContext)
+        public EventService(IUnitOfWork unitOfWork, ILogger<EventService> logger) : base(unitOfWork)
         {
             _logger = logger;
-            _eventContext = eventContext;
         }
 
         private void Log(string message)
@@ -37,45 +34,38 @@ namespace EventApp.Services
         public IEnumerable<Event> GetAll()
         {
             Log("GetAll");
-            return _eventContext.Events;
+            return UnitOfWork.GetRepository<Event>().GetAll();
         }
 
         public Event Get(int id)
         {
             Log("Get(" + id + ")");
-            return _eventContext.Events.Include(evt => evt.Place).FirstOrDefault(e => e.Id == id);
+            return UnitOfWork.GetRepository<Event>().GetByIdWithInclude(id, src => src.Include(evt => evt.Place));
         }
 
         public Event Create(Event newEvent)
         {
             Log("Create");
             newEvent.Id = 0;
-            _eventContext.Events.Add(newEvent);
-            _eventContext.SaveChanges();
+            UnitOfWork.GetRepository<Event>().Create(newEvent);
+            UnitOfWork.SaveChanges();
             return newEvent;
         }
 
         public Event Update(int evtId, Event updatedEvent)
         {
             Log("Update(" + evtId + ")");
-            var evt = _eventContext.Events.FirstOrDefault(e => e.Id == evtId);
-            if (evt != null)
-            {
-                evt = updatedEvent;
-                evt.Id = evtId;
-                _eventContext.Events.Update(evt);
-                _eventContext.SaveChanges();
-            }
-            return evt;
+            UnitOfWork.GetRepository<Event>().Update(evtId, updatedEvent);
+            UnitOfWork.SaveChanges();
+            return updatedEvent;
         }
 
         public IEnumerable<Event> Delete(int eventId)
         {
             Log("Delete(" + eventId + ")");
-            var evt = Get(eventId);
-            _eventContext.Events.Remove(evt);
-            _eventContext.SaveChanges();
-            return _eventContext.Events;
+            UnitOfWork.GetRepository<Event>().Delete(eventId);
+            UnitOfWork.SaveChanges();
+            return GetAll();
         }
     }
 }
