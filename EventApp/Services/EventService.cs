@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace EventApp.Services
 {
@@ -15,6 +16,7 @@ namespace EventApp.Services
         Event Create(Event newEvent);
         Event Update(int evtId, Event updatedEvent);
         IEnumerable<Event> Delete(int eventId);
+        Task<Event> GetEventAsync(int evtId);
     }
 
     public class EventService : AbstractService, IEventService
@@ -66,6 +68,15 @@ namespace EventApp.Services
             UnitOfWork.GetRepository<Event>().Delete(eventId);
             UnitOfWork.SaveChanges();
             return GetAll();
+        }
+
+        public async Task<Event> GetEventAsync(int evtId)
+        {
+            // var evt = await _context.Events.Where(e => e.Id == evtId).Include(e => e.Place).FirstOrDefaultAsync();
+            // return evt;
+
+            var evt = UnitOfWork.GetRepository<Event>().GetByIdWithInclude(evtId, src => src.Include(e => e.Place));
+            return evt;
         }
     }
 }

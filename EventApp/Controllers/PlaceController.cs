@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using EventApp.Models;
 using EventApp.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EventApp.Controllers
@@ -11,6 +10,7 @@ namespace EventApp.Controllers
     [Produces("application/json")]
     [Route("api/[controller]/[action]")]
     [ApiController]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class PlaceController : ControllerBase
     {
         private readonly IPlaceService _placeService;
@@ -27,6 +27,7 @@ namespace EventApp.Controllers
         /// <response code="500">Server error</response>
         // GET api/place/getall
         [HttpGet]
+        [Authorize(Roles = "Administrator, User")]
         public ActionResult<IEnumerable<Place>> GetAll()
         {
             return Ok(_placeService.GetAll());
@@ -40,6 +41,7 @@ namespace EventApp.Controllers
         /// <response code="500">Server error</response>
         // GET api/place/get/1
         [HttpGet("{evtId}")]
+        [Authorize(Roles = "Administrator, User")]
         public ActionResult<Place> Get(int placeId)
         {
             return Ok(_placeService.Get(placeId));
@@ -53,6 +55,7 @@ namespace EventApp.Controllers
         /// <response code="500">Server error</response>
         // POST api/place/create
         [HttpPost]
+        [Authorize(Roles = "Administrator")]
         public IActionResult Create([FromBody] Place newPlace)
         {
             var evt = _placeService.Create(newPlace);
@@ -68,6 +71,7 @@ namespace EventApp.Controllers
         /// <response code="500">Server error</response>
         // PUT api/place/update/1
         [HttpPut("{placeId}")]
+        [Authorize(Roles = "Administrator")]
         public IActionResult Update(int placeId, [FromBody] Place updatedPlace)
         {
             return Ok(_placeService.Update(placeId, updatedPlace));
@@ -81,6 +85,7 @@ namespace EventApp.Controllers
         /// <response code="500">Server error</response>
         // DELETE api/place/delete/1
         [HttpDelete("{placeId}")]
+        [Authorize(Roles = "Administrator")]
         public IActionResult Delete(int placeId)
         {
             return Ok(_placeService.Delete(placeId));

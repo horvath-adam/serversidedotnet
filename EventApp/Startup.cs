@@ -18,6 +18,9 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using EventApp.Auth;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc.Authorization;
 
 namespace EventApp
 {
@@ -34,7 +37,12 @@ namespace EventApp
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllersWithViews();
-            services.AddMvc()
+            services.AddMvc(config => {
+                    var policy = new AuthorizationPolicyBuilder()
+                        .RequireAuthenticatedUser()
+                        .Build();
+                    config.Filters.Add(new AuthorizeFilter(policy));
+                })
                 .SetCompatibilityVersion(CompatibilityVersion.Latest)
                 .AddNewtonsoftJson(options =>
                 {
@@ -112,6 +120,12 @@ namespace EventApp
                             ClockSkew = TimeSpan.Zero // remove delay of token when expire
                         };
                     });
+            services.AddAuthorization(options => {
+                options.AddPolicy("AdultsOnly", policy => {
+                    policy.Requirements.Add(new AdultsOnlyRequirement(18));
+                });
+            });
+            services.AddScoped<IAuthorizationHandler, AdultsOnlyHandler>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -134,6 +148,7 @@ namespace EventApp
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
